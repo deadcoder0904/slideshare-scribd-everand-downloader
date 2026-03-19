@@ -120,7 +120,11 @@ const KEY_HANDLERS: Map<string, KeyHandler> = new Map([
 // Rendering
 // ---------------------------------------------------------------------------
 
-function renderBuffer(buffer: string, cursor: number, prev: { lineCount: number; cursorRow: number }) {
+function renderBuffer(
+  buffer: string,
+  cursor: number,
+  prev: { lineCount: number; cursorRow: number }
+) {
   // Move from where cursor was left to the top of the block
   if (prev.cursorRow > 0) {
     output.write(`\x1b[${prev.cursorRow}A`)

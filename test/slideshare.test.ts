@@ -100,7 +100,8 @@ describe('extractTitle', () => {
   })
 
   test('extracts title from meta name="title" tag', () => {
-    const html = '<meta name="title" content="Everything You Need To Know About ChatGPT" data-next-head=""/>'
+    const html =
+      '<meta name="title" content="Everything You Need To Know About ChatGPT" data-next-head=""/>'
     expect(extractTitle(html, 'fallback-slug')).toBe('Everything You Need To Know About ChatGPT')
   })
 

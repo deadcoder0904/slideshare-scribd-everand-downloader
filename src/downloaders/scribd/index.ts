@@ -15,11 +15,50 @@ export async function execute(url: string): Promise<void> {
   const embedMatch = EMBED.exec(url)
 
   if (docMatch) {
-    await downloadEmbed(`https://www.scribd.com/embeds/${docMatch[2]}/content`)
+    const title = await fetchDocumentTitle(
+      `https://www.scribd.com/document/${docMatch[2]}/${docMatch[2]}`
+    )
+    await downloadEmbed(`https://www.scribd.com/embeds/${docMatch[2]}/content`, title)
   } else if (embedMatch) {
-    await downloadEmbed(url)
+    const title = await fetchDocumentTitle(
+      `https://www.scribd.com/document/${embedMatch[1]}/${embedMatch[1]}`
+    )
+    await downloadEmbed(url, title)
   } else {
     throw new Error(`Unsupported Scribd URL: ${url}`)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Title extraction from document page
+// ---------------------------------------------------------------------------
+
+export function extractTitleFromHtml(html: string): string | null {
+  // Match first "title":"..." in JSON data (the document's own title)
+  const jsonMatch = html.match(/"title"\s*:\s*"([^"]+)"/)
+  if (jsonMatch) {
+    const title = jsonMatch[1].trim()
+    // Filter out generic/junk titles
+    if (title && !title.match(/^(View on Scribd|Scribd)$/i)) {
+      return title
+    }
+  }
+
+  // Try og:title meta tag
+  const ogMatch = html.match(/<meta\s[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i)
+  if (ogMatch) return ogMatch[1].trim()
+
+  return null
+}
+
+async function fetchDocumentTitle(documentUrl: string): Promise<string | null> {
+  try {
+    const response = await fetch(documentUrl)
+    if (!response.ok) return null
+    const html = await response.text()
+    return extractTitleFromHtml(html)
+  } catch {
+    return null
   }
 }
 
@@ -27,7 +66,7 @@ export async function execute(url: string): Promise<void> {
 // Core download flow
 // ---------------------------------------------------------------------------
 
-async function downloadEmbed(url: string): Promise<void> {
+async function downloadEmbed(url: string, title: string | null): Promise<void> {
   const match = EMBED.exec(url)
   if (!match) throw new Error(`Unsupported URL: ${url}`)
 
@@ -40,7 +79,7 @@ async function downloadEmbed(url: string): Promise<void> {
 
   try {
     statusSpinner.message('Processing document...')
-    const { title, pages } = await prepareDocumentForExport(page)
+    const pages = await prepareDocumentForExport(page)
     const identifier = resolveIdentifier(title, documentId)
     const pdfPath = `${config.outputDir}/${identifier}.pdf`
     ensureDir(config.outputDir)
@@ -99,9 +138,7 @@ async function downloadMixedPages(
 // Page processing & DOM extraction
 // ---------------------------------------------------------------------------
 
-async function prepareDocumentForExport(
-  page: Page
-): Promise<{ title: string | null; pages: PageInfo[] }> {
+async function prepareDocumentForExport(page: Page): Promise<PageInfo[]> {
   return await page.evaluate(async (rendertime: number) => {
     const helpers = (window as any).__helpers__
 
@@ -115,9 +152,6 @@ async function prepareDocumentForExport(
 
     // Remove margins for clean PDF output
     helpers.removeMarginSelectorAll("div.outer_page_container div[id^='outer_page_']")
-
-    // Extract title from mobile overlay link
-    const title = extractDocumentTitle()
 
     // Collect page dimensions
     const pages: { id: string; width: number; height: number }[] = []
@@ -133,22 +167,7 @@ async function prepareDocumentForExport(
     // Replace body with just the document content
     document.body.innerHTML = document.querySelector('div.outer_page_container')!.innerHTML
 
-    return { title, pages }
-
-    function extractDocumentTitle(): string | null {
-      // Try mobile overlay link text
-      const overlay = document.querySelector('div.mobile_overlay a') as HTMLAnchorElement | null
-      if (overlay?.textContent?.trim()) return overlay.textContent.trim()
-
-      // Try document.title (set after page render)
-      if (document.title?.trim()) return document.title.trim()
-
-      // Try og:title meta tag
-      const ogTitle = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null
-      if (ogTitle?.content?.trim()) return ogTitle.content.trim()
-
-      return null
-    }
+    return pages
   }, config.scribdRendertime)
 }
 

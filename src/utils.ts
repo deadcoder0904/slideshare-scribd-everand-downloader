@@ -22,6 +22,11 @@ export function cleanDir(dirPath: string): void {
   rmSync(dirPath, { recursive: true })
 }
 
+function toTitleCase(str: string): string {
+  return str.replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
 export function resolveIdentifier(name: string | null, fallbackId: string): string {
-  return sanitize(config.filenameMode === 'title' ? (name ?? fallbackId) : fallbackId)
+  const raw = config.filenameMode === 'title' ? (name ?? fallbackId) : fallbackId
+  return sanitize(toTitleCase(raw))
 }

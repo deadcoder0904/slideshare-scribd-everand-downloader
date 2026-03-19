@@ -1,6 +1,33 @@
 import { describe, test, expect } from 'bun:test'
-import { groupPagesByDimensions } from '../src/downloaders/scribd'
+import { groupPagesByDimensions, extractTitleFromHtml } from '../src/downloaders/scribd'
 import type { PageInfo } from '../src/downloaders/scribd/types'
+
+describe('extractTitleFromHtml', () => {
+  test('extracts title from JSON data', () => {
+    const html = '{"title":"tiktok crash course","other":"data"}'
+    expect(extractTitleFromHtml(html)).toBe('tiktok crash course')
+  })
+
+  test('filters out "View on Scribd" generic title', () => {
+    const html = '{"title":"View on Scribd"}'
+    expect(extractTitleFromHtml(html)).toBeNull()
+  })
+
+  test('filters out "Scribd" generic title', () => {
+    const html = '{"title":"Scribd"}'
+    expect(extractTitleFromHtml(html)).toBeNull()
+  })
+
+  test('extracts title from og:title meta tag', () => {
+    const html = '<meta property="og:title" content="My Document Title" />'
+    expect(extractTitleFromHtml(html)).toBe('My Document Title')
+  })
+
+  test('returns null when no title found', () => {
+    const html = '<html><body>No title here</body></html>'
+    expect(extractTitleFromHtml(html)).toBeNull()
+  })
+})
 
 describe('groupPagesByDimensions', () => {
   test('groups pages with same dimensions into one group', () => {
