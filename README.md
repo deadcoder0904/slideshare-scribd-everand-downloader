@@ -52,6 +52,13 @@ https://www.everand.com/podcast/967145626/DAVID-GOGGINS-BEST-MOTIVATIONAL-SPEECH
 
 Use **Ctrl+J** or **Shift+Enter** for new lines and **Enter** to submit.
 
+### Non-interactive
+
+```bash
+bun start "https://www.scribd.com/document/679737266/tiktok-crash-course"
+bun start "https://www.slideshare.net/slideshow/tiktok-douyin-playbook-by-uplab/132915122" "https://www.everand.com/podcast/967145626/DAVID-GOGGINS-BEST-MOTIVATIONAL-SPEECH-LISTEN-TO-THIS-EVERYDAY-An-unfiltered-deep-dive-into-obsession-self-discipline-and-the-war-inside-your-own"
+```
+
 ## Configuration
 
 Copy `.env.example` to `.env` and customize:
