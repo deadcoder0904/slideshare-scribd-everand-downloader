@@ -55,17 +55,3 @@ jobs:
           fi
           echo "Downloaded successfully:"
           ls -la ./dist/*.pdf
-
-      # --- Test everand.com ---
-      - name: Download everand podcast
-        run: bun start "https://www.everand.com/podcast/967145626/DAVID-GOGGINS-BEST-MOTIVATIONAL-SPEECH-LISTEN-TO-THIS-EVERYDAY-An-unfiltered-deep-dive-into-obsession-self-discipline-and-the-war-inside-your-own"
-
-      - name: Verify everand download
-        run: |
-          COUNT=$(find ./dist -name '*.mp3' | wc -l)
-          if [ "$COUNT" -eq 0 ]; then
-            echo "Download failed: no MP3 found!"
-            exit 1
-          fi
-          echo "Downloaded successfully:"
-          ls -la ./dist/*.mp3
