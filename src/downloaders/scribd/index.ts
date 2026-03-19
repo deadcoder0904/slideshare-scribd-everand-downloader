@@ -136,9 +136,18 @@ async function prepareDocumentForExport(
     return { title, pages }
 
     function extractDocumentTitle(): string | null {
+      // Try mobile overlay link text
       const overlay = document.querySelector('div.mobile_overlay a') as HTMLAnchorElement | null
-      if (!overlay) return null
-      return decodeURIComponent(overlay.href.split('/').pop()?.trim() ?? '')
+      if (overlay?.textContent?.trim()) return overlay.textContent.trim()
+
+      // Try document.title (set after page render)
+      if (document.title?.trim()) return document.title.trim()
+
+      // Try og:title meta tag
+      const ogTitle = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null
+      if (ogTitle?.content?.trim()) return ogTitle.content.trim()
+
+      return null
     }
   }, config.scribdRendertime)
 }

@@ -48,4 +48,14 @@ describe('resolveIdentifier', () => {
     expect(result).not.toContain(':')
     expect(result).not.toContain('*')
   })
+
+  test('prefers title over slug for scribd documents', () => {
+    const result = resolveIdentifier('tiktok crash course', 'tiktok-crash-course')
+    expect(result).toBe('tiktok crash course')
+  })
+
+  test('prefers title over slug for slideshare presentations', () => {
+    const result = resolveIdentifier('Everything You Need To Know About ChatGPT', 'everything-you-need-to-know-about-chatgpt-8ba3')
+    expect(result).toBe('Everything You Need To Know About ChatGPT')
+  })
 })
