@@ -47,7 +47,7 @@ jobs:
 
       - name: Verify slideshare download
         run: |
-          FILE="./dist/Everything You Need To Know About ChatGPT.pdf"
+          FILE="./dist/everything-you-need-to-know-about-chatgpt-8ba3.pdf"
           if [ ! -f "$FILE" ]; then
             echo "Download failed: slides not found!"
             exit 1
