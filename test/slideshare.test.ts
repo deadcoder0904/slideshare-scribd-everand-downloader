@@ -98,4 +98,14 @@ describe('extractTitle', () => {
     const html = '<html><body>No title</body></html>'
     expect(extractTitle(html, 'my-slug')).toBe('my-slug')
   })
+
+  test('extracts title from meta name="title" tag', () => {
+    const html = '<meta name="title" content="Everything You Need To Know About ChatGPT" data-next-head=""/>'
+    expect(extractTitle(html, 'fallback-slug')).toBe('Everything You Need To Know About ChatGPT')
+  })
+
+  test('extracts title from JSON "title" field', () => {
+    const html = '{"totalSlides":10,"title":"My-Cool-Presentation","other":"data"}'
+    expect(extractTitle(html, 'fallback-slug')).toBe('My Cool Presentation')
+  })
 })

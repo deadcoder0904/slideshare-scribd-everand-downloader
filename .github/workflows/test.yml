@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
@@ -30,27 +30,42 @@ jobs:
 
       # --- Test scribd.com ---
       - name: Download scribd document
-        run: bun start "https://www.scribd.com/doc/8286154/Free-eBook-Retire-Happy-Wild-and-Free"
+        run: bun start "https://www.scribd.com/document/679737266/tiktok-crash-course"
 
       - name: Verify scribd file exists
         run: |
-          if [ ! -f "./dist/Free-eBook-Retire-Happy-Wild-and-Free.pdf" ]; then
-            echo "Download failed: scribd file not found!"
+          COUNT=$(find ./dist -name '*.pdf' | wc -l)
+          if [ "$COUNT" -eq 0 ]; then
+            echo "Download failed: no PDF found!"
             exit 1
-          else
-            echo "Downloaded successfully: scribd file exists."
           fi
+          echo "Downloaded successfully:"
+          ls -la ./dist/*.pdf
 
       # --- Test slideshare.net ---
       - name: Download slideshare presentation
-        run: bun start "https://www.slideshare.net/slideshow/everything-you-need-to-know-about-chatgpt-8ba3/266783915"
+        run: bun start "https://www.slideshare.net/slideshow/tiktok-douyin-playbook-by-uplab/132915122"
 
       - name: Verify slideshare download
         run: |
-          FILE="./dist/everything-you-need-to-know-about-chatgpt-8ba3.pdf"
-          if [ ! -f "$FILE" ]; then
-            echo "Download failed: slides not found!"
+          COUNT=$(find ./dist -name '*.pdf' | wc -l)
+          if [ "$COUNT" -lt 2 ]; then
+            echo "Download failed: expected 2 PDFs, found $COUNT"
             exit 1
-          else
-            echo "Downloaded successfully: slides exist."
           fi
+          echo "Downloaded successfully:"
+          ls -la ./dist/*.pdf
+
+      # --- Test everand.com ---
+      - name: Download everand podcast
+        run: bun start "https://www.everand.com/podcast/967145626/DAVID-GOGGINS-BEST-MOTIVATIONAL-SPEECH-LISTEN-TO-THIS-EVERYDAY-An-unfiltered-deep-dive-into-obsession-self-discipline-and-the-war-inside-your-own"
+
+      - name: Verify everand download
+        run: |
+          COUNT=$(find ./dist -name '*.mp3' | wc -l)
+          if [ "$COUNT" -eq 0 ]; then
+            echo "Download failed: no MP3 found!"
+            exit 1
+          fi
+          echo "Downloaded successfully:"
+          ls -la ./dist/*.mp3

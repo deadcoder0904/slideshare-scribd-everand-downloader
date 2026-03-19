@@ -39,9 +39,20 @@ export function extractSampleImageUrl(html: string): string | null {
 }
 
 export function extractTitle(html: string, fallback: string): string {
-  const match =
+  // Try <title> tag (only present in JS-rendered pages)
+  const titleTag =
     html.match(/<title>([^<]+)\|?\s*PDF<\/title>/i) || html.match(/<title>([^<]+)<\/title>/i)
-  return match ? match[1].split('|')[0].trim() : fallback
+  if (titleTag) return titleTag[1].split('|')[0].trim()
+
+  // Try <meta name="title" content="..."> (present in raw HTML)
+  const metaTitle = html.match(/<meta\s[^>]*name=["']title["'][^>]*content=["']([^"']+)["']/i)
+  if (metaTitle) return metaTitle[1].trim()
+
+  // Try JSON "title":"..." from embedded data
+  const jsonTitle = html.match(/"title"\s*:\s*"([^"]+)"/i)
+  if (jsonTitle) return jsonTitle[1].replace(/-/g, ' ').trim()
+
+  return fallback
 }
 
 // ---------------------------------------------------------------------------
