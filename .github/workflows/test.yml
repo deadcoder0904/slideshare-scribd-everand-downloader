@@ -1,12 +1,10 @@
-name: Nightly Regression
+name: CI
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    - cron: '0 2 * * *' # Runs at 02:00 UTC every day
 
 jobs:
   test:
